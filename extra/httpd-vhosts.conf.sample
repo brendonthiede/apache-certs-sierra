@@ -35,7 +35,7 @@
         Allow from all
     </Proxy>
     # Proxy some service running locally on a different port (but on the same path)
-    ProxyPass /awesomeapp http://localhost:8080/awesomeap timeout=600
+    ProxyPass /awesomeapp http://localhost:8080/awesomeapp timeout=600
     ProxyPassReverse /awesomeapp http://localhost:8080/awesomeapp
 
     <Location />
