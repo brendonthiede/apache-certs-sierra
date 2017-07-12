@@ -1,0 +1,81 @@
+#
+# Virtual Hosts
+#
+# If you want to maintain multiple domains/hostnames on your
+# machine you can setup VirtualHost containers for them. Most configurations
+# use only name-based virtual hosts so the server doesn't need to worry about
+# IP addresses. This is indicated by the asterisks in the directives below.
+#
+# Please see the documentation at 
+# <URL:http://httpd.apache.org/docs/2.2/vhosts/>
+# for further details before you try to setup virtual hosts.
+#
+# You may use the command line option '-S' to verify your virtual host
+# configuration.
+
+#
+# VirtualHost example:
+# Almost any Apache directive may go into a VirtualHost container.
+# The first VirtualHost section is used for all requests that do not
+# match a ServerName or ServerAlias in any <VirtualHost> block.
+#
+<VirtualHost *:80>
+    ServerName localhost
+    DocumentRoot "/Library/WebServer/Documents"
+    # Allow CORS requests so that localhost can use remote servers, etc.
+    <IfModule mod_headers.c>
+       SetEnvIf Origin "http(s)?://(.+)$" ACAO=$0
+       Header set Access-Control-Allow-Origin %{ACAO}e env=ACAO
+    </IfModule>
+    Header set Access-Control-Allow-Credentials "true"
+    ProxyRequests Off
+    ProxyPreserveHost On
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+    # Proxy some service running locally on a different port (but on the same path)
+    ProxyPass /awesomeapp http://localhost:8080/awesomeap timeout=600
+    ProxyPassReverse /awesomeapp http://localhost:8080/awesomeapp
+
+    <Location />
+        Order allow,deny
+        Allow from all
+    </Location>
+</VirtualHost>
+
+# Same thing as above, but with encryption
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot "/Library/WebServer/Documents"
+
+    SSLEngine on
+    SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+    SSLCertificateFile /etc/apache2/ssl/localhost.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/localhost.key
+
+    <Directory "/Library/WebServer/Documents">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+        Require all granted
+    </Directory>
+
+    # Allow CORS requests so that localhost can use remote servers, etc.
+    <IfModule mod_headers.c>
+       SetEnvIf Origin "http(s)?://(.+)$" ACAO=$0
+       Header set Access-Control-Allow-Origin %{ACAO}e env=ACAO
+    </IfModule>
+    Header set Access-Control-Allow-Credentials "true"
+    ProxyRequests Off
+    ProxyPreserveHost On
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+    # Proxy some service running locally on a different port (but on the same path)
+    ProxyPass /awesomeapp http://localhost:8080/awesomeap timeout=600
+    ProxyPassReverse /awesomeapp http://localhost:8080/awesomeapp
+</VirtualHost>
+
